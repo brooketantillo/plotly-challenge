@@ -40,7 +40,7 @@ function buildChart(sample) {
             title: "Top 10 OTUs",
             xaxis: { title: "Sample Values"},
             yaxis: { title: "OTU IDs"},
-            margin: {t: 20, l: 100}
+            margin: {t: 35, l: 100}
         }
         // Plot the bar chart
         Plotly.newPlot("bar", barData, layout);
@@ -63,7 +63,7 @@ function buildChart(sample) {
        var layoutBubble = {
            title: "Bacteria Per Samples",
            xaxis: { title: "OTU ID"},
-           margin: {t: 0},
+           margin: {t: 50},
            hovermode: "closest"
 
        }
