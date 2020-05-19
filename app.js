@@ -1,5 +1,5 @@
 
-function init(i) {
+function buildChart() {
     // Use D3 fetch to read the JSON file// Use D3 fetch to read the JSON file
     d3.json("data/samples.json").then((importedData) => {
         console.log(importedData)
@@ -62,41 +62,46 @@ function init(i) {
        }
         // Plot the bubble
         Plotly.newPlot("bubble", bubbleData, layoutBubble);
+    }
 
-         // Dropdown menu
-        // Define variable
-        var metadata = importedData.metadata[i];
-        var names = importedData.names;
-        var dropDownMenu = d3.select("#selDataset")
-        for (i in names ) {
-            var newName = dropDownMenu.append("option")
-            newName.text(names[i]);
-        }
+    )};
 
-        
-        // Select demographic
+function metaData() {
+    d3.json("data/samples.json").then((importedData) => {    
+    var metadata = importedData.metadata[0]
+         // Select demographic
         var panel = d3.select("#sample-metadata");
         // Clear the info 
         panel.html("");
         Object.entries(metadata).forEach(function ([key, value]) {
-            var row = panel.append("p")
-            row.text(`${key}:${value}`)
+            var row = panel.append("h5");
+            row.text(`${key}:${value}`);
             })     
+        })
+    };
+
+
+function init() {
+    var selector = d3.select("#selDataset")
     
+    d3.json("data/samples.json").then((importedData) => {
+        var dataNames = importedData.names
+        dataNames.forEach((dataName) => selector.append("option")
+            .text(dataName)
+            .property("value", dataName))
+        var firstValue = dataNames[0]
+        buildChart(firstValue);
+        metaData(firstValue);
     });
-}
-    function optionChanged(d) {
-        d3.json("data/samples.json").then((importedData) => {
-            console.log(importedData)
-    
-            var names = importedData.names;
-            const isNumber = (element) => element === d;
-            var indx = (names.findIndex(isNumber));
-            d3.selectAll("td").remove();
-            d3.selectAll("option").remove();
-            var dropDownMenu = d3.select("#selDataset")
-            dropDownMenu.append("option").text(d);
-            init(indx);
-        });
+
+        
+};
+
+    function optionChanged(valueChange) {
+        buildChart(valueChange);
+        metaData(valueChange);
     }
-init(0);
+    
+  
+
+init();
