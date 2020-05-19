@@ -1,20 +1,23 @@
 
-function buildChart() {
+function buildChart(sample) {
     // Use D3 fetch to read the JSON file// Use D3 fetch to read the JSON file
     d3.json("data/samples.json").then((importedData) => {
         console.log(importedData)
         // Begin defining variables from data for horizontal bar chart
-        var sampleValues = importedData.samples[0].sample_values;
+        var sampleValues = importedData.samples;
             console.log(sampleValues);
-        var otuIds = importedData.samples[0].otu_ids;
+        var filterSample = sampleValues.filter(sampleNum => sampleNum.id == sample)
+        var filterNum = filterSample[0]
+
+        var otuIds = filterNum.otu_ids;
             console.log(otuIds);            
-        var otuLabels = importedData.samples[0].otu_labels;
+        var otuLabels = filterNum.otu_labels;
             console.log(otuLabels)
         // Slice data to get top 10 sampleValues
-        var sampleTop = sampleValues.slice(0,10).reverse();
+        var sampleTop = filterNum.sample_values;
             console.log(sampleTop)
         // Slice data to get top 10 otu labels
-        var otuLabelTop = otuLabels.slice(0,10).reverse();
+        var otuLabelTop = otuIds.slice(0,10).reverse();
             console.log(otuLabelTop)
         // Slice data to get top otu ids
         var otuIdTop = otuIds.slice(0,10).reverse();
@@ -36,7 +39,8 @@ function buildChart() {
         var layout = {
             title: "Top 10 OTUs",
             xaxis: { title: "Sample Values"},
-            yaxis: { title: "OTU IDs"}
+            yaxis: { title: "OTU IDs"},
+            margin: {t: 20, l: 100}
         }
         // Plot the bar chart
         Plotly.newPlot("bar", barData, layout);
@@ -44,11 +48,11 @@ function buildChart() {
 //      // Create the trace for bubble chart
         var bubble = {
             x: otuIds,
-            y: sampleValues,
+            y: sampleTop,
             text: otuLabels,
             mode: 'markers',
             marker: {
-                size: sampleValues,
+                size: sampleTop,
                 color: otuIds,
                 colorscale: "Portland"
             }
@@ -58,7 +62,10 @@ function buildChart() {
        // Define the plot layout for the bubble chart
        var layoutBubble = {
            title: "Bacteria Per Samples",
-           xaxis: { title: "OTU ID"}
+           xaxis: { title: "OTU ID"},
+           margin: {t: 0},
+           hovermode: "closest"
+
        }
         // Plot the bubble
         Plotly.newPlot("bubble", bubbleData, layoutBubble);
@@ -66,15 +73,17 @@ function buildChart() {
 
     )};
 
-function metaData() {
+function buildMetadata(sample) {
     d3.json("data/samples.json").then((importedData) => {    
-    var metadata = importedData.metadata[0]
-         // Select demographic
-        var panel = d3.select("#sample-metadata");
+    var metadata = importedData.metadata
+        var filteredData = metadata.filter(sampleNum => sampleNum.id == sample);
+        var filteredNum = filteredData[0]
+        // Select demographic
+        var PANEL = d3.select("#sample-metadata");
         // Clear the info 
-        panel.html("");
-        Object.entries(metadata).forEach(function ([key, value]) {
-            var row = panel.append("h5");
+        PANEL.html("");
+        Object.entries(filteredNum).forEach(function ([key, value]) {
+            var row = PANEL.append("h5");
             row.text(`${key}:${value}`);
             })     
         })
@@ -82,7 +91,7 @@ function metaData() {
 
 
 function init() {
-    var selector = d3.select("#selDataset")
+    var selector = d3.select("#selDataset");
     
     d3.json("data/samples.json").then((importedData) => {
         var dataNames = importedData.names
@@ -91,7 +100,7 @@ function init() {
             .property("value", dataName))
         var firstValue = dataNames[0]
         buildChart(firstValue);
-        metaData(firstValue);
+        buildMetadata(firstValue);
     });
 
         
@@ -99,7 +108,7 @@ function init() {
 
     function optionChanged(valueChange) {
         buildChart(valueChange);
-        metaData(valueChange);
+        buildMetadata(valueChange);
     }
     
   
